@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzIT - Feed</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1>BuzzIT</h1>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search users by username...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-menu">
+                <div class="profile-pic" id="profile-initial">?</div>
+                <div class="dropdown-menu">
+                    <a href="#" id="profile-btn"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="sidebar">
+            <div class="menu-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-compass"></i>
+                <span>Explore</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
+            </div>
+        </div>
+
+        <div class="feed">
+            <div class="create-post-form">
+                <textarea placeholder="What's on your mind?"></textarea>
+                <div class="post-actions">
+                    <button class="upload-media">
+                        <i class="fas fa-image"></i> Add Photo/Video
+                    </button>
+                    <button class="post-btn">Post</button>
+                </div>
+            </div>
+            <div class="posts-container"></div>
+        </div>
+
+        <div class="right-sidebar">
+            <div class="suggested-users">
+                <h3>People to Follow</h3>
+                <div id="suggestions-list">
+                    <div class="loading-suggestions">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="comment-panel">
+        <div class="comment-panel-header">
+            <h3>Comments</h3>
+            <button class="close-comments">&times;</button>
+        </div>
+        <div class="comment-panel-content"></div>
+        <div class="comment-panel-input">
+            <textarea placeholder="Write a comment..."></textarea>
+            <button class="submit-comment">Post</button>
+        </div>
+    </div>
+
+    <div class="overlay"></div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

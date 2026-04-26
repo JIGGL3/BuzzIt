@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzIT - My Profile</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/index.html" class="nav-logo"><h1>BuzzIT</h1></a>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search users by username...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-menu">
+                <div class="profile-pic" id="nav-avatar">?</div>
+                <div class="dropdown-menu">
+                    <a href="/profile.html"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+
+        <!-- COVER + AVATAR SECTION -->
+        <div class="profile-hero">
+            <div class="cover-photo" id="cover-photo">
+                <div class="cover-overlay"></div>
+            </div>
+
+            <div class="profile-identity">
+                <div class="avatar-ring" id="avatar-ring">
+                    <div class="profile-avatar-big" id="profile-avatar">?</div>
+                    <label class="avatar-edit-btn" for="avatar-upload" title="Change photo">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="avatar-upload" accept="image/*" hidden>
+                </div>
+
+                <div class="profile-meta">
+                    <h1 id="profile-name">Loading...</h1>
+                    <p class="profile-username" id="profile-username">@</p>
+                    <p class="profile-bio" id="profile-bio-display"></p>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="edit-profile-btn" id="edit-profile-btn">
+                        <i class="fas fa-pen"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATS BAR -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-posts">0</span>
+                    <span class="stat-label">Posts</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-followers">0</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="stat-following">0</span>
+                    <span class="stat-label">Following</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT PROFILE MODAL -->
+        <div class="modal-backdrop" id="edit-modal" style="display:none">
+            <div class="edit-modal">
+                <div class="edit-modal-header">
+                    <h3>Edit Profile</h3>
+                    <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="edit-modal-body">
+                    <label>Display Name</label>
+                    <input type="text" id="edit-name" placeholder="Your name">
+                    <label>Bio</label>
+                    <textarea id="edit-bio" placeholder="Tell people about yourself..." rows="3"></textarea>
+                    <button class="save-profile-btn" id="save-profile-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- POSTS SECTION -->
+        <div class="profile-posts-section">
+            <div class="posts-tabs">
+                <button class="posts-tab active"><i class="fas fa-th"></i> Posts</button>
+            </div>
+            <div class="profile-posts-grid" id="profile-posts-grid">
+                <div class="posts-loading">Loading posts...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/js/profile.js"></script>
+</body>
+</html>

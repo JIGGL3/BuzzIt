@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzIT - User Profile</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/user-profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/index.html" class="nav-logo"><h1>BuzzIT</h1></a>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search users by username...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-menu">
+                <div class="profile-pic" id="profile-initial">?</div>
+                <div class="dropdown-menu">
+                    <a href="/profile.html"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="up-container">
+        <div class="up-card" id="profile-card">
+            <div class="up-avatar-wrap">
+                <div class="up-avatar" id="up-avatar"></div>
+            </div>
+            <div class="up-info">
+                <h2 id="up-name">Loading...</h2>
+                <p class="up-username" id="up-username">@</p>
+                <p class="up-bio" id="up-bio"></p>
+                <div class="up-stats">
+                    <div class="up-stat">
+                        <span class="up-stat-num" id="up-posts-count">0</span>
+                        <span class="up-stat-label">Posts</span>
+                    </div>
+                    <div class="up-stat">
+                        <span class="up-stat-num" id="up-followers-count">0</span>
+                        <span class="up-stat-label">Followers</span>
+                    </div>
+                    <div class="up-stat">
+                        <span class="up-stat-num" id="up-following-count">0</span>
+                        <span class="up-stat-label">Following</span>
+                    </div>
+                </div>
+                <button class="follow-btn-big" id="follow-btn" style="display:none">Follow</button>
+            </div>
+        </div>
+
+        <div class="up-posts-section">
+            <h3>Posts</h3>
+            <div class="posts-container" id="up-posts"></div>
+        </div>
+    </main>
+
+    <script src="/js/user-profile.js"></script>
+</body>
+</html>

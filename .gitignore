@@ -1,0 +1,4 @@
+node_modules/
+.env
+safe.env
+.DS_Store
