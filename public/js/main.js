@@ -5,6 +5,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let currentPostId = null;
 
+    // ── Dark Mode ─────────────────────────────────────────
+    const html = document.documentElement;
+    const darkBtn = document.getElementById('dark-mode-toggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    updateDarkIcon(savedTheme);
+
+    darkBtn.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateDarkIcon(next);
+    });
+
+    function updateDarkIcon(theme) {
+        darkBtn.innerHTML = theme === 'dark'
+            ? '<i class="fas fa-sun"></i>'
+            : '<i class="fas fa-moon"></i>';
+    }
+
     // ── Comment Panel ─────────────────────────────────────
     const commentPanel = document.querySelector('.comment-panel');
     const overlay = document.querySelector('.overlay');
@@ -55,29 +76,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayComments(comments) {
         const commentContent = commentPanel.querySelector('.comment-panel-content');
         if (!comments.length) {
-            commentContent.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+            commentContent.innerHTML = '<p class="no-comments">No comments yet. Be the first!</p>';
             return;
         }
         commentContent.innerHTML = comments.map(c => `
             <div class="comment">
-                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;${c.user.avatar ? `background-image:url(${c.user.avatar});background-size:cover;color:transparent` : ''}">
+                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85em;flex-shrink:0;overflow:hidden;${c.user.avatar ? `background-image:url(${c.user.avatar});background-size:cover;color:transparent` : ''}">
                     ${c.user.avatar ? '' : c.user.name[0].toUpperCase()}
                 </div>
                 <div class="comment-content">
-                    <h4>${c.user.name} <span style="color:#888;font-weight:400;font-size:0.8em">@${c.user.username || ''}</span></h4>
-                    <p>${c.content}</p>
+                    <h4>${c.user.name} <span style="color:var(--text3);font-weight:400;font-size:0.8em">@${c.user.username || ''}</span></h4>
+                    <p>${escapeHTML(c.content)}</p>
                     <span class="comment-time">${formatTime(c.createdAt)}</span>
                 </div>
             </div>
         `).join('');
     }
 
-    // ── Nav buttons ───────────────────────────────────────
-    document.getElementById('profile-btn').addEventListener('click', (e) => {
-        e.preventDefault(); window.location.href = 'profile.html';
-    });
-    document.getElementById('logout-btn').addEventListener('click', (e) => {
-        e.preventDefault(); localStorage.removeItem('token'); window.location.href = '/login.html';
+    // ── Sidebar logout ────────────────────────────────────
+    document.getElementById('sidebar-logout').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
     });
 
     // ── Search ────────────────────────────────────────────
@@ -88,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', () => {
         clearTimeout(searchTimeout);
         const q = searchInput.value.trim();
-        if (!q) { searchResults.style.display = 'none'; searchResults.innerHTML = ''; return; }
+        if (!q) { searchResults.style.display = 'none'; return; }
         searchTimeout = setTimeout(() => doSearch(q), 300);
     });
 
@@ -139,21 +158,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const users = await res.json();
             const list = document.getElementById('suggestions-list');
             if (!users.length) {
-                list.innerHTML = '<p style="color:#888;font-size:0.85em;">No suggestions right now.</p>';
+                list.innerHTML = '<p style="color:var(--text3);font-size:0.82em;padding:8px 0">No suggestions right now.</p>';
                 return;
             }
             list.innerHTML = users.map(u => `
                 <div class="user-suggestion" id="sug-${u._id}">
-                    <a href="/user/${u.username}" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:1">
+                    <a href="/user/${u.username}" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:1;min-width:0">
                         <div class="sug-avatar" style="${u.avatar ? `background-image:url(${u.avatar});background-size:cover;color:transparent` : ''}">
                             ${u.avatar ? '' : u.name[0].toUpperCase()}
                         </div>
-                        <div class="user-info">
-                            <h4>${u.name}</h4>
+                        <div class="user-info" style="min-width:0">
+                            <h4 style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.name}</h4>
                             <span>@${u.username}</span>
                         </div>
                     </a>
-                    <button class="follow-btn" data-id="${u._id}" data-following="false">Follow</button>
+                    <button class="follow-btn" data-id="${u._id}">Follow</button>
                 </div>
             `).join('');
 
@@ -174,26 +193,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.isFollowing) {
                 btn.textContent = 'Unfollow';
-                btn.style.background = 'white';
-                btn.style.color = '#667eea';
-                btn.style.border = '1px solid #667eea';
-                btn.dataset.following = 'true';
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--primary)';
+                btn.style.border = '1.5px solid var(--primary)';
             } else {
                 btn.textContent = 'Follow';
-                btn.style.background = '#667eea';
+                btn.style.background = 'var(--primary)';
                 btn.style.color = 'white';
                 btn.style.border = 'none';
-                btn.dataset.following = 'false';
             }
         } catch (err) { console.error(err); }
         finally { btn.disabled = false; }
     }
 
-    // ── Create post ───────────────────────────────────────
-    const createPostForm = document.querySelector('.create-post-form');
-    const postTextarea = createPostForm.querySelector('textarea');
-    const postBtn = createPostForm.querySelector('.post-btn');
-    const uploadMediaBtn = createPostForm.querySelector('.upload-media');
+    // ── Create Post ───────────────────────────────────────
+    const postTextarea = document.getElementById('post-textarea');
+    const postBtn = document.getElementById('post-btn');
+    const uploadMediaBtn = document.querySelector('.upload-media');
+    const mediaPreview = document.getElementById('cp-media-preview');
     let currentMediaFile = null;
 
     uploadMediaBtn.addEventListener('click', () => {
@@ -204,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = e.target.files[0];
             if (!file) return;
             currentMediaFile = file;
-            uploadMediaBtn.innerHTML = `<i class="fas fa-check"></i> ${file.name.substring(0,20)}`;
+            mediaPreview.textContent = `📎 ${file.name.substring(0, 22)}`;
         };
         input.click();
     });
@@ -216,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('content', content);
         if (currentMediaFile) formData.append('media', currentMediaFile);
 
-        postBtn.textContent = 'Posting...';
+        postBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
         postBtn.disabled = true;
         try {
             const res = await fetch('/api/posts', {
@@ -227,14 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 postTextarea.value = '';
                 currentMediaFile = null;
-                uploadMediaBtn.innerHTML = '<i class="fas fa-image"></i> Add Photo/Video';
+                mediaPreview.textContent = '';
                 loadPosts();
             }
         } catch (err) { console.error(err); }
-        finally { postBtn.textContent = 'Post'; postBtn.disabled = false; }
+        finally { postBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post'; postBtn.disabled = false; }
     });
 
-    // ── Load posts ────────────────────────────────────────
+    // ── Load Posts ────────────────────────────────────────
     async function loadPosts() {
         try {
             const res = await fetch('/api/posts', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -247,78 +264,109 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayPosts(posts) {
-        const postsContainer = document.querySelector('.posts-container');
-        postsContainer.innerHTML = '';
-        posts.forEach(post => postsContainer.appendChild(createPostElement(post)));
+        const container = document.querySelector('.posts-container');
+        container.innerHTML = '';
+        if (!posts.length) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:50px 20px;color:var(--text3)">
+                    <i class="fas fa-wind" style="font-size:2.5em;margin-bottom:12px;display:block"></i>
+                    <p>No posts yet. Be the first to buzz!</p>
+                </div>`;
+            return;
+        }
+        posts.forEach(post => container.appendChild(createPostElement(post)));
     }
 
-    // ── Current user ──────────────────────────────────────
+    // ── Current User ──────────────────────────────────────
     async function fetchCurrentUser() {
         try {
             const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (res.ok) { currentUser = await res.json(); updateProfileIcon(); }
+            if (res.ok) { currentUser = await res.json(); updateUI(); }
         } catch (err) { console.error(err); }
     }
 
-    function updateProfileIcon() {
-        const profileInitial = document.getElementById('profile-initial');
-        if (!profileInitial || !currentUser) return;
-        if (currentUser.avatar) {
-            profileInitial.style.backgroundImage = `url(${currentUser.avatar})`;
-            profileInitial.style.backgroundSize = 'cover';
-            profileInitial.style.color = 'transparent';
-            profileInitial.textContent = '';
+    function updateUI() {
+        if (!currentUser) return;
+
+        // Navbar avatar
+        const navAvatar = document.getElementById('profile-initial');
+        setAvatar(navAvatar, currentUser, true);
+
+        // Create post avatar
+        const cpAvatar = document.getElementById('cp-avatar');
+        setAvatar(cpAvatar, currentUser, true);
+
+        // Sidebar
+        const sideAvatar = document.getElementById('sidebar-avatar');
+        setAvatar(sideAvatar, currentUser, true);
+        document.getElementById('sidebar-name').textContent = currentUser.name;
+        document.getElementById('sidebar-username').textContent = `@${currentUser.username || ''}`;
+    }
+
+    function setAvatar(el, user, useBackground = false) {
+        if (!el || !user) return;
+        if (user.avatar) {
+            if (useBackground) {
+                el.style.backgroundImage = `url(${user.avatar})`;
+                el.style.backgroundSize = 'cover';
+                el.style.backgroundPosition = 'center';
+                el.style.color = 'transparent';
+                el.textContent = '';
+            } else {
+                el.style.backgroundImage = `url(${user.avatar})`;
+                el.style.backgroundSize = 'cover';
+                el.style.color = 'transparent';
+                el.textContent = '';
+            }
         } else {
-            profileInitial.style.backgroundImage = 'none';
-            profileInitial.style.color = '#fff';
-            profileInitial.textContent = currentUser.name[0].toUpperCase();
+            el.style.backgroundImage = 'none';
+            el.style.color = 'white';
+            el.textContent = user.name[0].toUpperCase();
         }
     }
 
-    // ── Post element ──────────────────────────────────────
+    // ── Post Element ──────────────────────────────────────
     function createPostElement(post) {
         const postDiv = document.createElement('div');
         postDiv.className = 'post';
 
         const isOwn = currentUser && post.user && post.user._id === currentUser._id;
-        const deleteBtnHTML = isOwn
-            ? `<button class="action-btn delete" data-post-id="${post._id}"><i class="fas fa-trash"></i></button>`
-            : '';
+        const isLiked = currentUser && post.likes.includes(currentUser._id);
 
         const avatarStyle = post.user.avatar
-            ? `background-image:url(${post.user.avatar});background-size:cover;color:transparent`
-            : `background:linear-gradient(135deg,#667eea,#764ba2);color:white`;
+            ? `background-image:url(${post.user.avatar});background-size:cover;background-position:center;color:transparent`
+            : `background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center`;
 
         postDiv.innerHTML = `
             <div class="post-header">
-                <a href="/user/${post.user.username || ''}" style="display:flex;align-items:center;gap:10px;text-decoration:none">
-                    <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1em;flex-shrink:0;${avatarStyle}">
+                <a href="/user/${post.user.username || ''}" style="display:flex;align-items:center;gap:12px;text-decoration:none;flex:1">
+                    <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1em;flex-shrink:0;overflow:hidden;${avatarStyle}">
                         ${post.user.avatar ? '' : post.user.name[0].toUpperCase()}
                     </div>
                     <div class="post-info">
-                        <h3 style="color:#1a1a2e">${post.user.name}</h3>
-                        <span style="color:#667eea;font-size:0.8em">@${post.user.username || ''}</span>
-                        <span class="post-time" style="margin-left:6px">${formatTime(post.createdAt)}</span>
+                        <h3>${post.user.name}</h3>
+                        <span style="color:var(--primary);font-size:0.78em;font-weight:500">@${post.user.username || ''}</span>
+                        <span class="post-time" style="margin-left:6px">· ${formatTime(post.createdAt)}</span>
                     </div>
                 </a>
-                ${deleteBtnHTML}
+                ${isOwn ? `<button class="action-btn delete" data-post-id="${post._id}" title="Delete post"><i class="fas fa-trash"></i></button>` : ''}
             </div>
             <div class="post-content">
-                <p class="post-text">${escapeHTML(post.content || '')}</p>
+                ${post.content ? `<p class="post-text">${escapeHTML(post.content)}</p>` : ''}
                 ${post.media
                     ? /\.(mp4|webm|ogg)$/i.test(post.media)
-                        ? `<video controls autoplay muted loop class="post-video"><source src="${post.media}" type="video/mp4"></video>`
+                        ? `<video controls muted loop class="post-video"><source src="${post.media}" type="video/mp4"></video>`
                         : `<img src="${post.media}" alt="Post media" class="post-image">`
                     : ''}
             </div>
             <div class="post-actions">
-                <button class="action-btn like" data-post-id="${post._id}">
-                    <i class="far fa-heart"></i>
-                    <span>${post.likes.length} Like</span>
+                <button class="action-btn like ${isLiked ? 'liked' : ''}" data-post-id="${post._id}">
+                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span>${post.likes.length}</span>
                 </button>
                 <button class="action-btn comment" data-post-id="${post._id}">
                     <i class="far fa-comment"></i>
-                    <span>${post.comments.length} Comment</span>
+                    <span>${post.comments.length}</span>
                 </button>
                 <button class="action-btn share" data-post-id="${post._id}">
                     <i class="far fa-share-square"></i>
@@ -351,9 +399,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const videos = document.querySelectorAll('.post-video');
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
-                entry.isIntersecting ? entry.target.play() : entry.target.pause();
+                entry.isIntersecting ? entry.target.play().catch(() => {}) : entry.target.pause();
             });
-        }, { threshold: 0.3 });
+        }, { threshold: 0.4 });
         videos.forEach(v => observer.observe(v));
     }
 
@@ -368,10 +416,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleShare(postId) {
-        const shareUrl = `${window.location.protocol}//${window.location.host}/post/${postId}`;
-        navigator.clipboard.writeText(shareUrl)
-            .then(() => alert('Post link copied to clipboard!'))
-            .catch(() => alert('Failed to copy link.'));
+        const url = `${window.location.protocol}//${window.location.host}/post/${postId}`;
+        navigator.clipboard.writeText(url)
+            .then(() => showToast('Link copied!'))
+            .catch(() => showToast('Could not copy link'));
+    }
+
+    // ── Toast ─────────────────────────────────────────────
+    function showToast(msg) {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.style.cssText = `
+                position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+                background:#1a1a2e;color:white;padding:10px 22px;border-radius:25px;
+                font-size:0.85em;opacity:0;transition:all 0.3s;z-index:9999;
+                pointer-events:none;white-space:nowrap;font-family:'Poppins',sans-serif;
+            `;
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(20px)';
+        }, 2500);
     }
 
     function formatTime(timestamp) {
