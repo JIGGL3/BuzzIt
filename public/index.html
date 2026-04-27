@@ -1,98 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuzzIT - Feed</title>
+    <title>BuzzIT</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-left">
-            <h1>BuzzIT</h1>
+            <a href="/index.html" class="nav-logo">
+                <span class="logo-buzz">Buzz</span><span class="logo-it">IT</span>
+            </a>
         </div>
         <div class="nav-center">
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="search-input" class="search-input" placeholder="Search users by username...">
+                <input type="text" id="search-input" class="search-input" placeholder="Search people...">
                 <div class="search-results" id="search-results"></div>
             </div>
         </div>
         <div class="nav-right">
+            <button class="dark-mode-toggle" id="dark-mode-toggle" title="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
             <div class="profile-menu">
                 <div class="profile-pic" id="profile-initial">?</div>
                 <div class="dropdown-menu">
-                    <a href="#" id="profile-btn"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="/profile.html" id="profile-btn"><i class="fas fa-user"></i> My Profile</a>
+                    <a href="/settings.html"><i class="fas fa-cog"></i> Settings</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="main-content">
+        <!-- Left Sidebar -->
         <div class="sidebar">
+            <a href="/profile.html" class="sidebar-user" id="sidebar-user">
+                <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+                <div class="sidebar-user-info">
+                    <h4 id="sidebar-name">Loading...</h4>
+                    <span id="sidebar-username">@</span>
+                </div>
+            </a>
+            <div class="sidebar-divider"></div>
             <div class="menu-item active">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
+                <i class="fas fa-home"></i><span>Home</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/profile.html'">
+                <i class="fas fa-user"></i><span>Profile</span>
             </div>
             <div class="menu-item">
-                <i class="fas fa-compass"></i>
-                <span>Explore</span>
+                <i class="fas fa-bell"></i><span>Notifications</span>
             </div>
             <div class="menu-item">
-                <i class="fas fa-bell"></i>
-                <span>Notifications</span>
+                <i class="fas fa-envelope"></i><span>Messages</span>
             </div>
             <div class="menu-item">
-                <i class="fas fa-envelope"></i>
-                <span>Messages</span>
+                <i class="fas fa-bookmark"></i><span>Saved</span>
             </div>
-            <div class="menu-item">
-                <i class="fas fa-bookmark"></i>
-                <span>Saved</span>
+            <div class="menu-item" onclick="window.location.href='/settings.html'">
+                <i class="fas fa-cog"></i><span>Settings</span>
+            </div>
+            <div class="sidebar-divider"></div>
+            <div class="menu-item danger-item" id="sidebar-logout">
+                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
             </div>
         </div>
 
+        <!-- Feed -->
         <div class="feed">
-            <div class="create-post-form">
-                <textarea placeholder="What's on your mind?"></textarea>
-                <div class="post-actions">
-                    <button class="upload-media">
-                        <i class="fas fa-image"></i> Add Photo/Video
+            <div class="create-post-card">
+                <div class="create-post-top">
+                    <div class="cp-avatar" id="cp-avatar">?</div>
+                    <textarea class="cp-textarea" id="post-textarea" placeholder="What's buzzing today?"></textarea>
+                </div>
+                <div class="create-post-bottom">
+                    <div class="cp-media-actions">
+                        <button class="cp-action-btn upload-media">
+                            <i class="fas fa-image"></i><span>Photo / Video</span>
+                        </button>
+                        <span class="cp-media-preview" id="cp-media-preview"></span>
+                    </div>
+                    <button class="cp-post-btn" id="post-btn">
+                        <i class="fas fa-paper-plane"></i> Post
                     </button>
-                    <button class="post-btn">Post</button>
                 </div>
             </div>
             <div class="posts-container"></div>
         </div>
 
+        <!-- Right Sidebar -->
         <div class="right-sidebar">
             <div class="suggested-users">
-                <h3>People to Follow</h3>
-                <div id="suggestions-list">
-                    <div class="loading-suggestions">Loading...</div>
+                <div class="rs-header">
+                    <h3>People to Follow</h3>
                 </div>
+                <div id="suggestions-list">
+                    <div class="loading-suggestions"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+                </div>
+            </div>
+            <div class="rs-footer">
+                <p>© 2025 BuzzIT · Made with ❤️<br>Connect · Share · Buzz</p>
             </div>
         </div>
     </main>
 
+    <!-- Comment Panel -->
     <div class="comment-panel">
         <div class="comment-panel-header">
-            <h3>Comments</h3>
-            <button class="close-comments">&times;</button>
+            <h3><i class="far fa-comment-dots"></i> Comments</h3>
+            <button class="close-comments"><i class="fas fa-times"></i></button>
         </div>
         <div class="comment-panel-content"></div>
         <div class="comment-panel-input">
             <textarea placeholder="Write a comment..."></textarea>
-            <button class="submit-comment">Post</button>
+            <button class="submit-comment"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <div class="overlay"></div>
-
     <script src="js/main.js"></script>
 </body>
 </html>

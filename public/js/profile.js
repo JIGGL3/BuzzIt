@@ -18,13 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => toast.classList.remove('show'), 2800);
     }
 
-    // ── Logout ────────────────────────────────────────────
-    document.getElementById('logout-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        window.location.href = '/login.html';
-    });
-
     // ── Search bar ────────────────────────────────────────
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');

@@ -72,13 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResults.style.display = 'block';
     }
 
-    // ── Logout ────────────────────────────────────────────
-    document.getElementById('logout-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        window.location.href = '/login.html';
-    });
-
     // ── Load profile ──────────────────────────────────────
     async function loadProfile() {
         try {

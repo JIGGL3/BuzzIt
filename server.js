@@ -36,6 +36,9 @@ const userSchema = new mongoose.Schema({
     bio: { type: String, default: '' },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    blocked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    isPrivate: { type: Boolean, default: false },
+    searchable: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
@@ -145,23 +148,91 @@ app.get('/api/me', auth, (req, res) => {
         avatar: req.user.avatar,
         bio: req.user.bio,
         followersCount: req.user.followers.length,
-        followingCount: req.user.following.length
+        followingCount: req.user.following.length,
+        isPrivate: req.user.isPrivate,
+        searchable: req.user.searchable
     });
 });
 
-// UPDATE PROFILE (name + bio)
+// UPDATE PROFILE (name, bio, username, isPrivate, searchable)
 app.patch('/api/me/update', auth, async (req, res) => {
     try {
-        const { name, bio } = req.body;
+        const { name, bio, username, isPrivate, searchable } = req.body;
         const user = await User.findById(req.user._id);
         if (name) user.name = name.trim();
         if (bio !== undefined) user.bio = bio.trim();
+        if (username && username !== user.username) {
+            const taken = await User.findOne({ username: username.toLowerCase() });
+            if (taken) return res.status(400).json({ error: 'Username already taken' });
+            user.username = username.toLowerCase();
+        }
+        if (isPrivate !== undefined) user.isPrivate = isPrivate;
+        if (searchable !== undefined) user.searchable = searchable;
         await user.save();
         res.json({ message: 'Profile updated' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error updating profile' });
     }
+});
+
+// CHANGE PASSWORD
+app.patch('/api/me/change-password', auth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user._id);
+        const valid = await bcrypt.compare(currentPassword, user.password);
+        if (!valid) return res.status(400).json({ error: 'Current password is incorrect' });
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.json({ message: 'Password updated' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error changing password' }); }
+});
+
+// GET BLOCKED USERS
+app.get('/api/me/blocked', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate('blocked', 'name username avatar');
+        res.json(user.blocked || []);
+    } catch (err) { res.status(500).json({ error: 'Error fetching blocked users' }); }
+});
+
+// BLOCK / UNBLOCK USER
+app.post('/api/users/:userId/block', auth, async (req, res) => {
+    try {
+        const targetId = req.params.userId;
+        if (targetId === req.user._id.toString()) return res.status(400).json({ error: 'Cannot block yourself' });
+        const me = await User.findById(req.user._id);
+        if (!me.blocked) me.blocked = [];
+        const isBlocked = me.blocked.map(id => id.toString()).includes(targetId);
+        if (isBlocked) {
+            me.blocked = me.blocked.filter(id => id.toString() !== targetId);
+        } else {
+            me.blocked.push(targetId);
+            // Also unfollow each other
+            me.following = me.following.filter(id => id.toString() !== targetId);
+            const target = await User.findById(targetId);
+            if (target) {
+                target.followers = target.followers.filter(id => id.toString() !== req.user._id.toString());
+                await target.save();
+            }
+        }
+        await me.save();
+        res.json({ isBlocked: !isBlocked });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error blocking user' }); }
+});
+
+// DELETE ACCOUNT
+app.delete('/api/me/delete', auth, async (req, res) => {
+    try {
+        const { password } = req.body;
+        const user = await User.findById(req.user._id);
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) return res.status(400).json({ error: 'Incorrect password' });
+        await Post.deleteMany({ user: req.user._id });
+        await User.findByIdAndDelete(req.user._id);
+        res.json({ message: 'Account deleted' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error deleting account' }); }
 });
 
 // USER SEARCH
