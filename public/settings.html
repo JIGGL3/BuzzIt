@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzIT - Settings</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/index.html" class="nav-logo"><h1>BuzzIT</h1></a>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search users by username...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-menu">
+                <div class="profile-pic" id="nav-avatar">?</div>
+                <div class="dropdown-menu">
+                    <a href="/profile.html"><i class="fas fa-user"></i> Profile</a>
+                    <a href="/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="settings-page">
+        <!-- Sidebar -->
+        <aside class="settings-sidebar">
+            <h2 class="settings-title">Settings</h2>
+            <nav class="settings-nav">
+                <a href="#" class="settings-nav-item active" data-section="edit-profile">
+                    <i class="fas fa-user-edit"></i> Edit Profile
+                </a>
+                <a href="#" class="settings-nav-item" data-section="change-password">
+                    <i class="fas fa-lock"></i> Change Password
+                </a>
+                <a href="#" class="settings-nav-item" data-section="privacy">
+                    <i class="fas fa-shield-alt"></i> Privacy
+                </a>
+                <a href="#" class="settings-nav-item" data-section="blocked">
+                    <i class="fas fa-ban"></i> Blocked Users
+                </a>
+                <a href="#" class="settings-nav-item" data-section="switch-account">
+                    <i class="fas fa-exchange-alt"></i> Switch Account
+                </a>
+                <a href="#" class="settings-nav-item danger" id="logout-side-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+                <a href="#" class="settings-nav-item danger" data-section="delete-account">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="settings-main">
+
+            <!-- Edit Profile -->
+            <section class="settings-section active" id="section-edit-profile">
+                <div class="section-header">
+                    <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
+                    <p>Update your public profile information</p>
+                </div>
+                <div class="section-body">
+                    <div class="avatar-edit-row">
+                        <div class="settings-avatar" id="settings-avatar">?</div>
+                        <div>
+                            <label class="change-photo-btn" for="avatar-upload">
+                                <i class="fas fa-camera"></i> Change Photo
+                            </label>
+                            <input type="file" id="avatar-upload" accept="image/*" hidden>
+                            <p class="field-hint">JPG, PNG or GIF. Max 5MB.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="edit-name" placeholder="Your full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <div class="input-prefix-wrap">
+                            <span class="input-prefix">@</span>
+                            <input type="text" id="edit-username" placeholder="username">
+                        </div>
+                        <span class="field-hint" id="username-hint"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Bio</label>
+                        <textarea id="edit-bio" rows="3" placeholder="Tell people about yourself..."></textarea>
+                    </div>
+                    <button class="save-btn" id="save-profile-btn">Save Changes</button>
+                </div>
+            </section>
+
+            <!-- Change Password -->
+            <section class="settings-section" id="section-change-password">
+                <div class="section-header">
+                    <h3><i class="fas fa-lock"></i> Change Password</h3>
+                    <p>Make sure your account stays secure</p>
+                </div>
+                <div class="section-body">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="current-password" placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="new-password" placeholder="Enter new password">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirm-password" placeholder="Confirm new password">
+                    </div>
+                    <button class="save-btn" id="save-password-btn">Update Password</button>
+                </div>
+            </section>
+
+            <!-- Privacy -->
+            <section class="settings-section" id="section-privacy">
+                <div class="section-header">
+                    <h3><i class="fas fa-shield-alt"></i> Privacy</h3>
+                    <p>Control who can see your content</p>
+                </div>
+                <div class="section-body">
+                    <div class="toggle-row">
+                        <div class="toggle-info">
+                            <h4>Private Account</h4>
+                            <p>When on, only your followers can see your posts</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="private-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <div class="toggle-info">
+                            <h4>Show in Search</h4>
+                            <p>Allow others to find you by username or name</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="searchable-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="save-btn" id="save-privacy-btn">Save Privacy Settings</button>
+                </div>
+            </section>
+
+            <!-- Blocked Users -->
+            <section class="settings-section" id="section-blocked">
+                <div class="section-header">
+                    <h3><i class="fas fa-ban"></i> Blocked Users</h3>
+                    <p>People you've blocked can't see your profile or posts</p>
+                </div>
+                <div class="section-body">
+                    <div id="blocked-list">
+                        <div class="empty-state">
+                            <i class="fas fa-user-check"></i>
+                            <p>You haven't blocked anyone</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Switch Account -->
+            <section class="settings-section" id="section-switch-account">
+                <div class="section-header">
+                    <h3><i class="fas fa-exchange-alt"></i> Switch Account</h3>
+                    <p>Log into a different account</p>
+                </div>
+                <div class="section-body">
+                    <div class="current-account-card" id="current-account-card">
+                        <div class="ca-avatar" id="ca-avatar">?</div>
+                        <div class="ca-info">
+                            <h4 id="ca-name">Loading...</h4>
+                            <span id="ca-username">@</span>
+                        </div>
+                        <span class="active-badge">Active</span>
+                    </div>
+                    <p class="field-hint" style="margin-top:16px">To switch accounts, log out and log in with a different account.</p>
+                    <button class="save-btn outline-btn" id="switch-logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout & Switch
+                    </button>
+                </div>
+            </section>
+
+            <!-- Delete Account -->
+            <section class="settings-section" id="section-delete-account">
+                <div class="section-header">
+                    <h3><i class="fas fa-trash-alt"></i> Delete Account</h3>
+                    <p>Permanently delete your account and all your data</p>
+                </div>
+                <div class="section-body">
+                    <div class="danger-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <h4>This action is irreversible</h4>
+                            <p>Deleting your account will permanently remove your profile, all your posts, comments, and followers. This cannot be undone.</p>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:20px">
+                        <label>Enter your password to confirm</label>
+                        <input type="password" id="delete-password" placeholder="Your password">
+                    </div>
+                    <div class="form-group">
+                        <label>Type <strong>DELETE</strong> to confirm</label>
+                        <input type="text" id="delete-confirm-text" placeholder="Type DELETE here">
+                    </div>
+                    <button class="save-btn danger-btn" id="delete-account-btn">
+                        <i class="fas fa-trash-alt"></i> Permanently Delete Account
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    <!-- Crop Modal -->
+<div class="crop-backdrop" id="crop-modal" style="display:none">
+    <div class="crop-modal">
+        <div class="crop-modal-header">
+            <h3>Crop Profile Photo</h3>
+            <button id="crop-cancel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="crop-area">
+            <canvas id="crop-canvas"></canvas>
+            <div class="crop-circle-overlay"></div>
+        </div>
+        <div class="crop-controls">
+            <label>Zoom</label>
+            <input type="range" id="crop-zoom" min="1" max="3" step="0.01" value="1">
+        </div>
+        <div class="crop-actions">
+            <button class="save-btn outline-btn" id="crop-cancel-btn">Cancel</button>
+            <button class="save-btn" id="crop-save-btn"><i class="fas fa-check"></i> Apply</button>
+        </div>
+    </div>
+</div>
+
+    <script src="/js/settings.js"></script>
+</body>
+</html>
