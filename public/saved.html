@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuzzIT</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>BuzzIT - Saved</title>
+    <link rel="stylesheet" href="/styles/theme.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/saved.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -29,7 +30,7 @@
             <div class="profile-menu">
                 <div class="profile-pic" id="profile-initial">?</div>
                 <div class="dropdown-menu">
-                    <a href="/profile.html" id="profile-btn"><i class="fas fa-user"></i> My Profile</a>
+                    <a href="/profile.html"><i class="fas fa-user"></i> My Profile</a>
                     <a href="/settings.html"><i class="fas fa-cog"></i> Settings</a>
                 </div>
             </div>
@@ -37,9 +38,8 @@
     </nav>
 
     <main class="main-content">
-        <!-- Left Sidebar -->
         <div class="sidebar">
-            <a href="/profile.html" class="sidebar-user" id="sidebar-user">
+            <a href="/profile.html" class="sidebar-user">
                 <div class="sidebar-avatar" id="sidebar-avatar">?</div>
                 <div class="sidebar-user-info">
                     <h4 id="sidebar-name">Loading...</h4>
@@ -47,7 +47,7 @@
                 </div>
             </a>
             <div class="sidebar-divider"></div>
-            <div class="menu-item active">
+            <div class="menu-item" onclick="window.location.href='/index.html'">
                 <i class="fas fa-home"></i><span>Home</span>
             </div>
             <div class="menu-item" onclick="window.location.href='/profile.html'">
@@ -59,7 +59,7 @@
             <div class="menu-item">
                 <i class="fas fa-envelope"></i><span>Messages</span>
             </div>
-            <div class="menu-item" onclick="window.location.href='/saved.html'">
+            <div class="menu-item active" onclick="window.location.href='/saved.html'">
                 <i class="fas fa-bookmark"></i><span>Saved</span>
             </div>
             <div class="menu-item" onclick="window.location.href='/settings.html'">
@@ -71,58 +71,29 @@
             </div>
         </div>
 
-        <!-- Feed -->
-        <div class="feed">
-            <div class="create-post-card">
-                <div class="create-post-top">
-                    <div class="cp-avatar" id="cp-avatar">?</div>
-                    <textarea class="cp-textarea" id="post-textarea" placeholder="What's buzzing today?"></textarea>
-                </div>
-                <div class="create-post-bottom">
-                    <div class="cp-media-actions">
-                        <button class="cp-action-btn upload-media">
-                            <i class="fas fa-image"></i><span>Photo / Video</span>
-                        </button>
-                        <span class="cp-media-preview" id="cp-media-preview"></span>
-                    </div>
-                    <button class="cp-post-btn" id="post-btn">
-                        <i class="fas fa-paper-plane"></i> Post
-                    </button>
+        <div class="saved-main">
+            <div class="saved-header">
+                <div class="saved-header-icon"><i class="fas fa-bookmark"></i></div>
+                <div>
+                    <h2>Saved Posts</h2>
+                    <p id="saved-count">Loading...</p>
                 </div>
             </div>
-            <div class="posts-container"></div>
+            <div id="saved-posts-container"></div>
         </div>
 
-        <!-- Right Sidebar -->
         <div class="right-sidebar">
             <div class="suggested-users">
-                <div class="rs-header">
-                    <h3>People to Follow</h3>
-                </div>
+                <div class="rs-header"><h3>People to Follow</h3></div>
                 <div id="suggestions-list">
                     <div class="loading-suggestions"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                 </div>
             </div>
-            <div class="rs-footer">
-                <p>© 2025 BuzzIT · Made with ❤️<br>Connect · Share · Buzz</p>
-            </div>
         </div>
     </main>
 
-    <!-- Comment Panel -->
-    <div class="comment-panel">
-        <div class="comment-panel-header">
-            <h3><i class="far fa-comment-dots"></i> Comments</h3>
-            <button class="close-comments"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="comment-panel-content"></div>
-        <div class="comment-panel-input">
-            <textarea placeholder="Write a comment..."></textarea>
-            <button class="submit-comment"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </div>
-
     <div class="overlay"></div>
-    <script src="js/main.js"></script>
+    <script src="/js/saved.js"></script>
+    <script src="/js/theme.js"></script>
 </body>
 </html>

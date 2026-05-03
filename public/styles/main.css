@@ -169,6 +169,7 @@ body {
     border: 1px solid var(--border);
     animation: fadeDown 0.15s ease;
 }
+
 .profile-menu::after {
     content: '';
     position: absolute;
@@ -342,11 +343,18 @@ body {
 .post {
     background: var(--surface);
     border-radius: var(--radius);
-    padding: 18px 20px;
+    padding: 16px 18px 0;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.2s, transform 0.2s;
     animation: slideUp 0.25s ease;
+    overflow: hidden;
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 @keyframes slideUp {
@@ -356,14 +364,44 @@ body {
 
 .post:hover { box-shadow: var(--shadow); }
 
+/* ── Post Header ─────────────────────────────────────── */
 .post-header {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; margin-bottom: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
 }
 
 .post-info h3 { font-size: 0.93em; color: var(--text); font-weight: 600; margin-bottom: 2px; }
 .post-time { color: var(--text3); font-size: 0.73em; }
 
+/* ── Post Top Actions (save + delete) ────────────────── */
+.post-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.post-icon-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82em;
+    transition: all 0.2s;
+}
+
+.post-icon-btn:hover { background: var(--surface2); color: var(--primary); }
+.post-icon-btn.saved { color: var(--primary); }
+.post-icon-btn.delete-btn:hover { background: rgba(231,76,60,0.08); color: var(--danger); }
+
+/* ── Post Content ────────────────────────────────────── */
 .post-text {
     color: var(--text); font-size: 0.92em;
     line-height: 1.65; margin-bottom: 12px; white-space: pre-wrap;
@@ -381,31 +419,41 @@ body {
     border: 1px solid var(--border);
 }
 
+/* ── Post Actions (like/comment/share) ───────────────── */
 .post-actions {
-    display: flex; gap: 4px; align-items: center;
-    padding-top: 10px; border-top: 1px solid var(--border);
+    display: flex;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
 }
 
 .action-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    background: none; border: none; color: var(--text2);
-    cursor: pointer; font-size: 0.83em; font-weight: 500;
-    padding: 7px 14px; border-radius: 20px;
-    font-family: 'Poppins', sans-serif; transition: all 0.2s;
-    flex: 1; vertical-align: middle; line-height: 1;
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 0.83em;
+    font-weight: 500;
+    padding: 11px 0;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+    line-height: 1;
 }
 
 .action-btn:hover { background: var(--surface2); color: var(--primary); }
 .action-btn:hover i { color: var(--primary); }
-.action-btn i { transition: color 0.2s; }
+.action-btn i { line-height: 1; font-size: 1em; }
+.action-btn span { line-height: 1; }
 
 .action-btn.liked { color: #e74c3c; }
 .action-btn.liked i { color: #e74c3c; }
 .action-btn.liked:hover { background: rgba(231,76,60,0.07); color: #e74c3c; }
 
-.action-btn.delete { flex: 0; padding: 7px 10px; color: var(--text3); }
-.action-btn.delete:hover { background: rgba(231,76,60,0.1); color: #e74c3c !important; }
-.action-btn.delete:hover i { color: #e74c3c !important; }
 
 /* ── Right Sidebar ───────────────────────────────────── */
 .right-sidebar {
@@ -495,8 +543,7 @@ body {
 
 .comment {
     display: flex; gap: 10px;
-    margin-bottom: 14px; padding-bottom: 14px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 5px; padding-bottom: 5px;
 }
 
 .comment:last-child { border-bottom: none; }

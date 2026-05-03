@@ -1,0 +1,110 @@
+.saved-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.saved-header {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.saved-header-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: var(--primary-grad);
+    color: white;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.saved-header h2 {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+
+.saved-header p {
+    font-size: 0.82em;
+    color: var(--text3);
+}
+
+.saved-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    color: var(--text3);
+}
+
+.saved-empty i {
+    font-size: 3em;
+    margin-bottom: 14px;
+    display: block;
+    color: var(--border);
+}
+
+.saved-empty h3 {
+    font-size: 1em;
+    color: var(--text2);
+    margin-bottom: 6px;
+}
+
+.saved-empty p {
+    font-size: 0.83em;
+}
+
+.saved-empty a {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 10px 24px;
+    background: var(--primary-grad);
+    color: white;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 0.86em;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.saved-empty a:hover { opacity: 0.85; }
+
+.unsave-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    color: var(--text3);
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 0.75em;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.unsave-btn:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(231,76,60,0.07);
+}
+/* gap between posts  */
+#saved-posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
