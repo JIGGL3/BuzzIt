@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // ── Dark Mode ─────────────────────────────────────────
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    const darkBtn = document.getElementById('dark-mode-toggle');
+    if (darkBtn) {
+        darkBtn.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        darkBtn.addEventListener('click', () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            darkBtn.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        });
+    }
     const token = localStorage.getItem('token');
     if (!token) { window.location.href = '/login.html'; return; }
 
@@ -72,6 +86,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResults.style.display = 'block';
     }
 
+    // ── Logout ────────────────────────────────────────────
+    document.getElementById('logout-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
+    });
+
     // ── Load profile ──────────────────────────────────────
     async function loadProfile() {
         try {
@@ -103,12 +124,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('up-posts-count').textContent = data.posts.length;
             document.title = `BuzzIT - ${data.name}`;
 
-            // Only show follow button if viewing someone else's profile
+            // Only show follow/message buttons if viewing someone else's profile
             const followBtn = document.getElementById('follow-btn');
+            const msgBtn = document.getElementById('msg-btn');
             if (currentUser && currentUser._id !== data._id) {
                 followBtn.style.display = 'inline-block';
                 updateFollowBtn(followBtn, data.isFollowing);
                 followBtn.addEventListener('click', () => handleFollow(followBtn));
+
+                if (msgBtn) {
+                    msgBtn.style.display = 'inline-flex';
+                    msgBtn.addEventListener('click', () => {
+                        window.location.href = `/messages.html?user=${data.username}`;
+                    });
+                }
             }
 
             renderPosts(data.posts);

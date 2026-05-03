@@ -288,15 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUI() {
         if (!currentUser) return;
 
-        // Navbar avatar
         const navAvatar = document.getElementById('profile-initial');
         setAvatar(navAvatar, currentUser, true);
 
-        // Create post avatar
         const cpAvatar = document.getElementById('cp-avatar');
         setAvatar(cpAvatar, currentUser, true);
 
-        // Sidebar
         const sideAvatar = document.getElementById('sidebar-avatar');
         setAvatar(sideAvatar, currentUser, true);
         document.getElementById('sidebar-name').textContent = currentUser.name;
@@ -332,6 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isOwn = currentUser && post.user && post.user._id === currentUser._id;
         const isLiked = currentUser && post.likes.includes(currentUser._id);
+        const savedPosts = JSON.parse(localStorage.getItem('savedPosts') || '[]');
+        const isSaved = savedPosts.includes(post._id);
 
         const avatarStyle = post.user.avatar
             ? `background-image:url(${post.user.avatar});background-size:cover;background-position:center;color:transparent`
@@ -349,7 +348,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="post-time" style="margin-left:6px">· ${formatTime(post.createdAt)}</span>
                     </div>
                 </a>
-                ${isOwn ? `<button class="action-btn delete" data-post-id="${post._id}" title="Delete post"><i class="fas fa-trash"></i></button>` : ''}
+                <div class="post-top-actions">
+                    <button class="post-icon-btn save-btn ${isSaved ? 'saved' : ''}" title="${isSaved ? 'Unsave' : 'Save'} post">
+                        <i class="${isSaved ? 'fas' : 'far'} fa-bookmark"></i>
+                    </button>
+                    ${isOwn ? `<button class="post-icon-btn delete-btn" title="Delete post"><i class="fas fa-trash"></i></button>` : ''}
+                </div>
             </div>
             <div class="post-content">
                 ${post.content ? `<p class="post-text">${escapeHTML(post.content)}</p>` : ''}
@@ -360,18 +364,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     : ''}
             </div>
             <div class="post-actions">
-                <button class="action-btn like ${isLiked ? 'liked' : ''}" data-post-id="${post._id}">
-                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                    <span>${post.likes.length}</span>
-                </button>
-                <button class="action-btn comment" data-post-id="${post._id}">
-                    <i class="far fa-comment"></i>
-                    <span>${post.comments.length}</span>
-                </button>
-                <button class="action-btn share" data-post-id="${post._id}">
-                    <i class="far fa-share-square"></i>
-                    <span>Share</span>
-                </button>
+                <button class="action-btn like ${isLiked ? 'liked' : ''}" data-post-id="${post._id}"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i><span>${post.likes.length}</span></button>
+                <button class="action-btn comment" data-post-id="${post._id}"><i class="far fa-comment"></i><span>${post.comments.length}</span></button>
+                <button class="action-btn share" data-post-id="${post._id}"><i class="far fa-share-square"></i><span>Share</span></button>
             </div>
         `;
 
@@ -379,7 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
         postDiv.querySelector('.comment').addEventListener('click', () => openCommentPanel(post._id));
         postDiv.querySelector('.share').addEventListener('click', () => handleShare(post._id));
 
-        const deleteBtn = postDiv.querySelector('.delete');
+        postDiv.querySelector('.save-btn').addEventListener('click', () => handleSave(post._id, postDiv.querySelector('.save-btn')));
+
+        const deleteBtn = postDiv.querySelector('.delete-btn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async () => {
                 if (!confirm('Delete this post?')) return;
@@ -413,6 +410,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (res.ok) loadPosts();
         } catch (err) { console.error(err); }
+    }
+
+    // ── Save ──────────────────────────────────────────────
+    function handleSave(postId, btn) {
+        const savedPosts = JSON.parse(localStorage.getItem('savedPosts') || '[]');
+        const idx = savedPosts.indexOf(postId);
+        if (idx === -1) {
+            savedPosts.push(postId);
+            btn.classList.add('saved');
+            btn.querySelector('i').className = 'fas fa-bookmark';
+            showToast('Post saved!');
+        } else {
+            savedPosts.splice(idx, 1);
+            btn.classList.remove('saved');
+            btn.querySelector('i').className = 'far fa-bookmark';
+            showToast('Post unsaved');
+        }
+        localStorage.setItem('savedPosts', JSON.stringify(savedPosts));
     }
 
     function handleShare(postId) {

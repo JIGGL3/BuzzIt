@@ -56,6 +56,27 @@ const postSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Post = mongoose.model('Post', postSchema);
+// ── Message Schemas ───────────────────────────────────
+const conversationSchema = new mongoose.Schema({
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
+    lastMessage: {
+        content: String,
+        sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        createdAt: { type: Date }
+    },
+    updatedAt: { type: Date, default: Date.now }
+});
+const Conversation = mongoose.model('Conversation', conversationSchema);
+
+const messageSchema = new mongoose.Schema({
+    conversation: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
+    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    content: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+const Message = mongoose.model('Message', messageSchema);
+
+
 
 const auth = async (req, res, next) => {
     try {
@@ -431,9 +452,98 @@ app.get('/api/posts/media', auth, async (req, res) => {
     } catch { res.status(500).json({ error: 'Error fetching media posts' }); }
 });
 
+
+// ── MESSAGES ROUTES ───────────────────────────────────
+
+// Get all conversations for current user
+app.get('/api/conversations', auth, async (req, res) => {
+    try {
+        const convs = await Conversation.find({
+            participants: req.user._id
+        })
+        .populate('participants', 'name username avatar')
+        .sort({ updatedAt: -1 });
+        res.json(convs);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error fetching conversations' }); }
+});
+
+// Create or get existing conversation
+app.post('/api/conversations', auth, async (req, res) => {
+    try {
+        const { participantId } = req.body;
+        if (!participantId) return res.status(400).json({ error: 'participantId required' });
+        if (participantId === req.user._id.toString()) return res.status(400).json({ error: 'Cannot message yourself' });
+
+        // Check if conversation already exists
+        let conv = await Conversation.findOne({
+            participants: { $all: [req.user._id, participantId] }
+        }).populate('participants', 'name username avatar');
+
+        if (!conv) {
+            conv = new Conversation({
+                participants: [req.user._id, participantId]
+            });
+            await conv.save();
+            conv = await Conversation.findById(conv._id).populate('participants', 'name username avatar');
+        }
+
+        res.json(conv);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error creating conversation' }); }
+});
+
+// Get messages in a conversation
+app.get('/api/conversations/:convId/messages', auth, async (req, res) => {
+    try {
+        const conv = await Conversation.findById(req.params.convId);
+        if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+        if (!conv.participants.map(p => p.toString()).includes(req.user._id.toString())) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+
+        const messages = await Message.find({ conversation: req.params.convId })
+            .populate('sender', 'name username avatar')
+            .sort({ createdAt: 1 });
+        res.json(messages);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error fetching messages' }); }
+});
+
+// Send a message
+app.post('/api/conversations/:convId/messages', auth, async (req, res) => {
+    try {
+        const { content } = req.body;
+        if (!content || !content.trim()) return res.status(400).json({ error: 'Message content required' });
+
+        const conv = await Conversation.findById(req.params.convId);
+        if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+        if (!conv.participants.map(p => p.toString()).includes(req.user._id.toString())) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+
+        const message = new Message({
+            conversation: req.params.convId,
+            sender: req.user._id,
+            content: content.trim()
+        });
+        await message.save();
+
+        // Update conversation lastMessage
+        conv.lastMessage = {
+            content: content.trim(),
+            sender: req.user._id,
+            createdAt: new Date()
+        };
+        conv.updatedAt = new Date();
+        await conv.save();
+
+        const populated = await Message.findById(message._id).populate('sender', 'name username avatar');
+        res.status(201).json(populated);
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error sending message' }); }
+});
+
 // PAGE ROUTES
 app.get('/post/:id', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/user/:username', (req, res) => res.sendFile(path.join(__dirname, 'public', 'user-profile.html')));
+app.get('/messages', (req, res) => res.sendFile(path.join(__dirname, 'public', 'messages.html')));
 app.get('/explore', (req, res) => res.sendFile(path.join(__dirname, 'public', 'explore.html')));
 app.use('/styles', express.static(path.join(__dirname, 'styles')));
 app.use('/js', express.static(path.join(__dirname, 'js')));

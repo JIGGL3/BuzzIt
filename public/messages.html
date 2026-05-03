@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzIT - Messages</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/messages.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/index.html" class="nav-logo">
+                <span class="logo-buzz">Buzz</span><span class="logo-it">IT</span>
+            </a>
+        </div>
+        <div class="nav-center">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search people...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button class="dark-mode-toggle" id="dark-mode-toggle" title="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="profile-menu">
+                <div class="profile-pic" id="profile-initial">?</div>
+                <div class="dropdown-menu">
+                    <a href="/profile.html"><i class="fas fa-user"></i> My Profile</a>
+                    <a href="/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content messages-page">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <a href="/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+                <div class="sidebar-user-info">
+                    <h4 id="sidebar-name">Loading...</h4>
+                    <span id="sidebar-username">@</span>
+                </div>
+            </a>
+            <div class="sidebar-divider"></div>
+            <div class="menu-item" onclick="window.location.href='/index.html'">
+                <i class="fas fa-home"></i><span>Home</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/profile.html'">
+                <i class="fas fa-user"></i><span>Profile</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-bell"></i><span>Notifications</span>
+            </div>
+            <div class="menu-item active">
+                <i class="fas fa-envelope"></i><span>Messages</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/saved.html'">
+                <i class="fas fa-bookmark"></i><span>Saved</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/settings.html'">
+                <i class="fas fa-cog"></i><span>Settings</span>
+            </div>
+            <div class="sidebar-divider"></div>
+            <div class="menu-item danger-item" id="sidebar-logout">
+                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+            </div>
+        </div>
+
+        <!-- Messages Layout -->
+        <div class="messages-layout">
+            <!-- Conversations List -->
+            <div class="conversations-panel" id="conversations-panel">
+                <div class="conv-header">
+                    <h2>Messages</h2>
+                    <button class="new-msg-btn" id="new-msg-btn" title="New message">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <div class="conv-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="conv-search" placeholder="Search conversations...">
+                </div>
+                <div class="conv-list" id="conv-list">
+                    <div class="conv-loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+                </div>
+            </div>
+
+            <!-- Chat Window -->
+            <div class="chat-panel" id="chat-panel">
+                <div class="chat-empty" id="chat-empty">
+                    <i class="fas fa-comments"></i>
+                    <h3>Your Messages</h3>
+                    <p>Send a message to start a conversation</p>
+                    <button class="start-chat-btn" id="start-chat-btn">
+                        <i class="fas fa-edit"></i> New Message
+                    </button>
+                </div>
+
+                <!-- Chat Header (hidden until conv selected) -->
+                <div class="chat-header" id="chat-header" style="display:none">
+                    <div class="chat-user-info">
+                        <div class="chat-avatar" id="chat-avatar">?</div>
+                        <div>
+                            <h4 id="chat-name">-</h4>
+                            <span id="chat-username">@</span>
+                        </div>
+                    </div>
+                    <a class="view-profile-btn" id="view-profile-btn" href="#">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+
+                <!-- Messages -->
+                <div class="chat-messages" id="chat-messages"></div>
+
+                <!-- Input -->
+                <div class="chat-input-area" id="chat-input-area" style="display:none">
+                    <div class="chat-input-wrap">
+                        <textarea id="chat-input" placeholder="Write a message..." rows="1"></textarea>
+                        <button class="send-btn" id="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Message Modal -->
+    <div class="new-msg-modal" id="new-msg-modal" style="display:none">
+        <div class="new-msg-box">
+            <div class="new-msg-header">
+                <h3>New Message</h3>
+                <button id="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="new-msg-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="user-search-input" placeholder="Search users...">
+            </div>
+            <div class="new-msg-results" id="new-msg-results"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="modal-overlay"></div>
+
+    <script src="/js/messages.js"></script>
+</body>
+</html>
