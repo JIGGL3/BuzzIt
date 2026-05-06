@@ -478,6 +478,176 @@ document.addEventListener('DOMContentLoaded', () => {
                    .replace(/"/g,'&quot;').replace(/'/g,'&#039;').replace(/\n/g,'<br>');
     }
 
+
+    // ── Nearby Users ──────────────────────────────────────
+    const locationToggle = document.getElementById('location-toggle');
+    const nearbyRangeRow = document.getElementById('nearby-range-row');
+    const rangeSlider = document.getElementById('range-slider');
+    const rangeDisplay = document.getElementById('range-display');
+    const nearbyContent = document.getElementById('nearby-content');
+
+    let locationWatchId = null;
+    let nearbyRange = 1000;
+    let rangeSaveTimeout = null;
+
+    // Format range display
+    function formatRange(meters) {
+        if (meters >= 1000) return `${(meters / 1000).toFixed(1)}km`;
+        return `${meters}m`;
+    }
+
+    // Load saved range preference from server
+    async function loadNearbyPrefs() {
+        try {
+            const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) {
+                const data = await res.json();
+                nearbyRange = data.nearbyRange || 1000;
+                rangeSlider.value = nearbyRange;
+                rangeDisplay.textContent = formatRange(nearbyRange);
+                if (data.shareLocation) {
+                    locationToggle.checked = true;
+                    nearbyRangeRow.style.display = 'flex';
+                    startLocationSharing();
+                }
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    // Range slider
+    rangeSlider.addEventListener('input', () => {
+        nearbyRange = parseInt(rangeSlider.value);
+        rangeDisplay.textContent = formatRange(nearbyRange);
+        clearTimeout(rangeSaveTimeout);
+        rangeSaveTimeout = setTimeout(async () => {
+            try {
+                await fetch('/api/me/nearby-range', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ range: nearbyRange })
+                });
+                loadNearbyUsers();
+            } catch (err) { console.error(err); }
+        }, 800);
+    });
+
+    // Location toggle
+    locationToggle.addEventListener('change', () => {
+        if (locationToggle.checked) {
+            nearbyRangeRow.style.display = 'flex';
+            startLocationSharing();
+        } else {
+            nearbyRangeRow.style.display = 'none';
+            stopLocationSharing();
+        }
+    });
+
+    function startLocationSharing() {
+        if (!navigator.geolocation) {
+            showToast('Geolocation not supported by your browser');
+            locationToggle.checked = false;
+            return;
+        }
+        nearbyContent.innerHTML = '<div class="nearby-loading"><i class="fas fa-spinner fa-spin"></i> Getting location...</div>';
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                await sendLocation(pos.coords.latitude, pos.coords.longitude);
+                loadNearbyUsers();
+                // Watch for location changes
+                locationWatchId = navigator.geolocation.watchPosition(
+                    (p) => sendLocation(p.coords.latitude, p.coords.longitude),
+                    null,
+                    { maximumAge: 60000, timeout: 10000 }
+                );
+            },
+            (err) => {
+                locationToggle.checked = false;
+                nearbyRangeRow.style.display = 'none';
+                nearbyContent.innerHTML = '<div class="nearby-error"><i class="fas fa-exclamation-circle"></i> Location access denied</div>';
+            },
+            { timeout: 10000 }
+        );
+    }
+
+    async function sendLocation(lat, lng) {
+        try {
+            await fetch('/api/me/location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ latitude: lat, longitude: lng })
+            });
+        } catch (err) { console.error(err); }
+    }
+
+    async function stopLocationSharing() {
+        if (locationWatchId !== null) {
+            navigator.geolocation.clearWatch(locationWatchId);
+            locationWatchId = null;
+        }
+        try {
+            await fetch('/api/me/location', {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch (err) { console.error(err); }
+        nearbyContent.innerHTML = `
+            <div class="nearby-off-msg">
+                <i class="fas fa-location-crosshairs"></i>
+                <p>Enable location to see who\'s nearby</p>
+            </div>`;
+    }
+
+    async function loadNearbyUsers() {
+        try {
+            nearbyContent.innerHTML = '<div class="nearby-loading"><i class="fas fa-spinner fa-spin"></i> Looking nearby...</div>';
+            const res = await fetch('/api/users/nearby', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+
+            if (data.error === 'location_off') {
+                nearbyContent.innerHTML = `<div class="nearby-off-msg"><i class="fas fa-location-crosshairs"></i><p>Enable location to see who\'s nearby</p></div>`;
+                return;
+            }
+
+            if (!data.users || !data.users.length) {
+                nearbyContent.innerHTML = `<div class="nearby-empty"><i class="fas fa-user-slash" style="display:block;font-size:1.6em;margin-bottom:8px;color:var(--border)"></i>No one nearby within ${formatRange(nearbyRange)}</div>`;
+                return;
+            }
+
+            nearbyContent.innerHTML = data.users.map(u => `
+                <div class="nearby-user-item">
+                    <a href="/user/${u.username}" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:1;min-width:0">
+                        <div class="nearby-avatar" style="${u.avatar ? `background-image:url(${u.avatar});background-size:cover;color:transparent` : ''}">${u.avatar ? '' : u.name[0].toUpperCase()}</div>
+                        <div class="nearby-info">
+                            <h4>${u.name}</h4>
+                            <span>@${u.username}</span>
+                        </div>
+                    </a>
+                    <button class="nearby-follow-btn" data-id="${u._id}" data-following="${u.isFollowing}">${u.isFollowing ? 'Unfollow' : 'Follow'}</button>
+                </div>
+            `).join('');
+
+            nearbyContent.querySelectorAll('.nearby-follow-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch(`/api/users/${btn.dataset.id}/follow`, {
+                            method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const d = await res.json();
+                        btn.textContent = d.isFollowing ? 'Unfollow' : 'Follow';
+                        btn.dataset.following = d.isFollowing;
+                    } catch (err) { console.error(err); }
+                    finally { btn.disabled = false; }
+                });
+            });
+        } catch (err) {
+            nearbyContent.innerHTML = '<div class="nearby-error">Failed to load nearby users</div>';
+        }
+    }
+
+    loadNearbyPrefs();
+
     // ── Init ──────────────────────────────────────────────
     fetchCurrentUser();
     loadPosts();

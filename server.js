@@ -39,8 +39,16 @@ const userSchema = new mongoose.Schema({
     blocked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     isPrivate: { type: Boolean, default: false },
     searchable: { type: Boolean, default: true },
+    location: {
+        type: { type: String, enum: ['Point'], default: 'Point' },
+        coordinates: { type: [Number], default: [0, 0] } // [longitude, latitude]
+    },
+    locationUpdatedAt: { type: Date },
+    nearbyRange: { type: Number, default: 1000 }, // meters, set by user
+    shareLocation: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
+userSchema.index({ location: '2dsphere' });
 const User = mongoose.model('User', userSchema);
 
 const postSchema = new mongoose.Schema({
@@ -538,6 +546,88 @@ app.post('/api/conversations/:convId/messages', auth, async (req, res) => {
         const populated = await Message.findById(message._id).populate('sender', 'name username avatar');
         res.status(201).json(populated);
     } catch (err) { console.error(err); res.status(500).json({ error: 'Error sending message' }); }
+});
+
+
+// ── NEARBY USERS ──────────────────────────────────────
+
+// Update current user's location
+app.post('/api/me/location', auth, async (req, res) => {
+    try {
+        const { latitude, longitude } = req.body;
+        if (latitude === undefined || longitude === undefined) {
+            return res.status(400).json({ error: 'latitude and longitude required' });
+        }
+        const user = await User.findById(req.user._id);
+        user.location = { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] };
+        user.locationUpdatedAt = new Date();
+        user.shareLocation = true;
+        await user.save();
+        res.json({ message: 'Location updated' });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Error updating location' }); }
+});
+
+// Stop sharing location
+app.delete('/api/me/location', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        user.shareLocation = false;
+        await user.save();
+        res.json({ message: 'Location sharing stopped' });
+    } catch (err) { res.status(500).json({ error: 'Error' }); }
+});
+
+// Update nearby range preference
+app.patch('/api/me/nearby-range', auth, async (req, res) => {
+    try {
+        const { range } = req.body;
+        const user = await User.findById(req.user._id);
+        user.nearbyRange = Math.min(Math.max(parseInt(range) || 1000, 100), 50000); // 100m to 50km
+        await user.save();
+        res.json({ nearbyRange: user.nearbyRange });
+    } catch (err) { res.status(500).json({ error: 'Error updating range' }); }
+});
+
+// Get nearby users
+app.get('/api/users/nearby', auth, async (req, res) => {
+    try {
+        const me = await User.findById(req.user._id);
+        if (!me.shareLocation || !me.location || !me.location.coordinates || (me.location.coordinates[0] === 0 && me.location.coordinates[1] === 0)) {
+            return res.json({ error: 'location_off', users: [] });
+        }
+
+        const range = me.nearbyRange || 1000;
+        const staleThreshold = new Date(Date.now() - 30 * 60 * 1000); // 30 min
+
+        const nearby = await User.find({
+            _id: { $ne: req.user._id },
+            shareLocation: true,
+            locationUpdatedAt: { $gte: staleThreshold },
+            location: {
+                $nearSphere: {
+                    $geometry: { type: 'Point', coordinates: me.location.coordinates },
+                    $maxDistance: range
+                }
+            }
+        })
+        .select('username avatar name followers')
+        .limit(10);
+
+        // Only return username and avatar — no location data sent to client
+        const result = nearby.map(u => ({
+            _id: u._id,
+            username: u.username,
+            name: u.name,
+            avatar: u.avatar,
+            followersCount: u.followers.length,
+            isFollowing: u.followers.map(id => id.toString()).includes(req.user._id.toString())
+        }));
+
+        res.json({ users: result, range, error: null });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error fetching nearby users', users: [] });
+    }
 });
 
 // PAGE ROUTES

@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; return; }
+
     // ── Dark Mode ─────────────────────────────────────────
     const html = document.documentElement;
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -13,9 +16,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             darkBtn.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         });
     }
-    const token = localStorage.getItem('token');
-    if (!token) { window.location.href = '/login.html'; return; }
 
+    // Get username from URL
     const pathParts = window.location.pathname.split('/');
     const username = pathParts[pathParts.length - 1];
     if (!username) { window.location.href = '/index.html'; return; }
@@ -23,37 +25,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     let targetUserId = null;
     let currentUser = null;
 
-    // ── Load current logged-in user ───────────────────────
-    try {
-        const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) {
-            currentUser = await res.json();
-            const profileInitial = document.getElementById('profile-initial');
-            if (currentUser.avatar) {
-                profileInitial.style.backgroundImage = `url(${currentUser.avatar})`;
-                profileInitial.style.backgroundSize = 'cover';
-                profileInitial.style.color = 'transparent';
-                profileInitial.textContent = '';
-            } else {
-                profileInitial.textContent = currentUser.name[0].toUpperCase();
-            }
-        }
-    } catch (err) { console.error(err); }
+    // ── Logout ────────────────────────────────────────────
+    const logoutBtn = document.getElementById('sidebar-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+    }
 
     // ── Search bar ────────────────────────────────────────
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
     let searchTimeout = null;
 
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        const q = searchInput.value.trim();
-        if (!q) { searchResults.style.display = 'none'; searchResults.innerHTML = ''; return; }
-        searchTimeout = setTimeout(() => doSearch(q), 300);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            const q = searchInput.value.trim();
+            if (!q) { searchResults.style.display = 'none'; return; }
+            searchTimeout = setTimeout(() => doSearch(q), 300);
+        });
+    }
 
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-container')) searchResults.style.display = 'none';
+        if (!e.target.closest('.search-container')) {
+            if (searchResults) searchResults.style.display = 'none';
+        }
     });
 
     async function doSearch(q) {
@@ -62,36 +60,109 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const users = await res.json();
-            renderSearchResults(users);
+            if (!users.length) {
+                searchResults.innerHTML = '<div class="no-results">No users found</div>';
+            } else {
+                searchResults.innerHTML = users.filter(u => u.username).map(u => `
+                    <div class="search-result-item" onclick="window.location.href='/user/${u.username}'">
+                        <div class="sr-avatar" style="${u.avatar ? `background-image:url(${u.avatar});background-size:cover;color:transparent` : ''}">
+                            ${u.avatar ? '' : u.name[0].toUpperCase()}
+                        </div>
+                        <div class="sr-info">
+                            <span class="sr-name">${u.name}</span>
+                            <span class="sr-username">@${u.username}</span>
+                        </div>
+                        <span class="sr-followers">${u.followersCount} followers</span>
+                    </div>
+                `).join('');
+            }
+            searchResults.style.display = 'block';
         } catch { searchResults.style.display = 'none'; }
     }
 
-    function renderSearchResults(users) {
-        if (!users.length) {
-            searchResults.innerHTML = '<div class="no-results">No users found</div>';
-        } else {
-            searchResults.innerHTML = users.filter(u => u.username).map(u => `
-                <div class="search-result-item" onclick="window.location.href='/user/${u.username}'">
-                    <div class="sr-avatar" style="${u.avatar ? `background-image:url(${u.avatar});background-size:cover;color:transparent` : ''}">
-                        ${u.avatar ? '' : u.name[0].toUpperCase()}
-                    </div>
-                    <div class="sr-info">
-                        <span class="sr-name">${u.name}</span>
-                        <span class="sr-username">@${u.username}</span>
-                    </div>
-                    <span class="sr-followers">${u.followersCount} followers</span>
-                </div>
-            `).join('');
-        }
-        searchResults.style.display = 'block';
+    // ── Load current logged-in user ───────────────────────
+    async function loadCurrentUser() {
+        try {
+            const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) { window.location.href = '/login.html'; return; }
+            currentUser = await res.json();
+
+            // Nav avatar
+            const navAvatar = document.getElementById('profile-initial');
+            if (navAvatar) {
+                if (currentUser.avatar) {
+                    navAvatar.style.backgroundImage = `url(${currentUser.avatar})`;
+                    navAvatar.style.backgroundSize = 'cover';
+                    navAvatar.style.backgroundPosition = 'center';
+                    navAvatar.style.color = 'transparent';
+                    navAvatar.textContent = '';
+                } else {
+                    navAvatar.textContent = currentUser.name[0].toUpperCase();
+                }
+            }
+
+            // Sidebar avatar
+            const sideAvatar = document.getElementById('sidebar-avatar');
+            if (sideAvatar) {
+                if (currentUser.avatar) {
+                    sideAvatar.style.backgroundImage = `url(${currentUser.avatar})`;
+                    sideAvatar.style.backgroundSize = 'cover';
+                    sideAvatar.style.backgroundPosition = 'center';
+                    sideAvatar.style.color = 'transparent';
+                    sideAvatar.textContent = '';
+                } else {
+                    sideAvatar.textContent = currentUser.name[0].toUpperCase();
+                }
+            }
+
+            const sidebarName = document.getElementById('sidebar-name');
+            const sidebarUsername = document.getElementById('sidebar-username');
+            if (sidebarName) sidebarName.textContent = currentUser.name;
+            if (sidebarUsername) sidebarUsername.textContent = `@${currentUser.username || ''}`;
+        } catch (err) { console.error(err); }
     }
 
-    // ── Logout ────────────────────────────────────────────
-    document.getElementById('logout-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        window.location.href = '/login.html';
-    });
+    // ── Load suggestions ──────────────────────────────────
+    async function loadSuggestions() {
+        try {
+            const res = await fetch('/api/users/suggestions/list', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const users = await res.json();
+            const list = document.getElementById('suggestions-list');
+            if (!list) return;
+            if (!users.length) {
+                list.innerHTML = '<p style="color:var(--text3);font-size:0.82em;padding:8px 0">No suggestions right now.</p>';
+                return;
+            }
+            list.innerHTML = users.map(u => `
+                <div class="user-suggestion">
+                    <a href="/user/${u.username}" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:1;min-width:0">
+                        <div class="sug-avatar" style="${u.avatar ? `background-image:url(${u.avatar});background-size:cover;color:transparent` : ''}">${u.avatar ? '' : u.name[0].toUpperCase()}</div>
+                        <div class="user-info" style="min-width:0">
+                            <h4 style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.name}</h4>
+                            <span>@${u.username}</span>
+                        </div>
+                    </a>
+                    <button class="follow-btn" data-id="${u._id}">Follow</button>
+                </div>
+            `).join('');
+
+            list.querySelectorAll('.follow-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch(`/api/users/${btn.dataset.id}/follow`, {
+                            method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        btn.textContent = data.isFollowing ? 'Unfollow' : 'Follow';
+                    } catch (err) { console.error(err); }
+                    finally { btn.disabled = false; }
+                });
+            });
+        } catch (err) { console.error(err); }
+    }
 
     // ── Load profile ──────────────────────────────────────
     async function loadProfile() {
@@ -112,6 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 avatarEl.style.backgroundImage = `url(${data.avatar})`;
                 avatarEl.style.backgroundSize = 'cover';
                 avatarEl.style.color = 'transparent';
+                avatarEl.textContent = '';
             } else {
                 avatarEl.textContent = data.name[0].toUpperCase();
             }
@@ -124,9 +196,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('up-posts-count').textContent = data.posts.length;
             document.title = `BuzzIT - ${data.name}`;
 
-            // Only show follow/message buttons if viewing someone else's profile
+            // Follow + Message buttons
             const followBtn = document.getElementById('follow-btn');
             const msgBtn = document.getElementById('msg-btn');
+
             if (currentUser && currentUser._id !== data._id) {
                 followBtn.style.display = 'inline-block';
                 updateFollowBtn(followBtn, data.isFollowing);
@@ -141,9 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             renderPosts(data.posts);
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     function updateFollowBtn(btn, isFollowing) {
@@ -169,12 +240,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
             updateFollowBtn(btn, data.isFollowing);
             document.getElementById('up-followers-count').textContent = data.followersCount;
-        } catch (err) {
-            console.error(err);
-            btn.textContent = 'Error';
-        } finally {
-            btn.disabled = false;
-        }
+        } catch (err) { console.error(err); }
+        finally { btn.disabled = false; }
     }
 
     function renderPosts(posts) {
@@ -183,31 +250,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.innerHTML = '<p class="no-posts">No posts yet.</p>';
             return;
         }
-        container.innerHTML = posts.map(post => `
+        container.innerHTML = posts.map(post => {
+            const avatarStyle = post.user.avatar
+                ? `background-image:url(${post.user.avatar});background-size:cover;background-position:center;color:transparent`
+                : `background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center`;
+            return `
             <div class="post">
-                <div class="post-header" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                    <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;${post.user.avatar ? `background-image:url(${post.user.avatar});background-size:cover;color:transparent` : ''}">
+                <div class="post-header" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95em;flex-shrink:0;overflow:hidden;${avatarStyle}">
                         ${post.user.avatar ? '' : post.user.name[0].toUpperCase()}
                     </div>
                     <div>
-                        <div style="font-weight:600;font-size:0.95em;color:#1a1a2e">${post.user.name}</div>
-                        <div style="font-size:0.78em;color:#667eea">@${post.user.username || ''} · ${formatTime(post.createdAt)}</div>
+                        <div style="font-weight:600;font-size:0.92em;color:var(--text)">${post.user.name}</div>
+                        <div style="font-size:0.75em;color:var(--primary)">@${post.user.username || ''} <span style="color:var(--text3);margin-left:4px">· ${formatTime(post.createdAt)}</span></div>
                     </div>
                 </div>
-                <div class="post-content">
-                    ${post.content ? `<p style="margin-bottom:10px;line-height:1.6;color:#333">${escapeHTML(post.content)}</p>` : ''}
-                    ${post.media
-                        ? /\.(mp4|webm|ogg)$/i.test(post.media)
-                            ? `<video controls muted loop class="post-video" style="width:100%;border-radius:10px;max-height:400px"><source src="${post.media}" type="video/mp4"></video>`
-                            : `<img src="${post.media}" alt="Post media" class="post-image" style="width:100%;border-radius:10px;max-height:400px;object-fit:cover">`
-                        : ''}
-                </div>
-                <div style="border-top:1px solid #eee;padding-top:10px;margin-top:10px;display:flex;gap:20px;color:#888;font-size:0.85em">
+                ${post.content ? `<p style="font-size:0.9em;line-height:1.6;color:var(--text);margin-bottom:10px;white-space:pre-wrap">${escapeHTML(post.content)}</p>` : ''}
+                ${post.media
+                    ? /\.(mp4|webm|ogg)$/i.test(post.media)
+                        ? `<video controls muted loop class="post-video" style="width:100%;border-radius:10px;max-height:400px;margin-bottom:10px"><source src="${post.media}" type="video/mp4"></video>`
+                        : `<img src="${post.media}" alt="Post media" class="post-image" style="width:100%;border-radius:10px;max-height:400px;object-fit:cover;margin-bottom:10px">`
+                    : ''}
+                <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;gap:16px;color:var(--text3);font-size:0.82em">
                     <span><i class="far fa-heart"></i> ${post.likes.length} Likes</span>
                     <span><i class="far fa-comment"></i> ${post.comments.length} Comments</span>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     }
 
     function escapeHTML(text) {
@@ -228,5 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return 'Just now';
     }
 
-    loadProfile();
+    await loadCurrentUser();
+    await loadProfile();
+    loadSuggestions();
 });

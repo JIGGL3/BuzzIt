@@ -103,6 +103,32 @@
                     <div class="loading-suggestions"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                 </div>
             </div>
+            <!-- Nearby Users -->
+            <div class="nearby-section" id="nearby-section">
+                <div class="nearby-header">
+                    <div class="nearby-title-row">
+                        <div class="nearby-title">
+                            <i class="fas fa-location-dot"></i>
+                            <h3>Nearby</h3>
+                        </div>
+                        <label class="nearby-toggle-wrap" title="Share your location">
+                            <input type="checkbox" id="location-toggle">
+                            <span class="nearby-toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="nearby-range-row" id="nearby-range-row" style="display:none">
+                        <span class="range-label">Range: <strong id="range-display">1000m</strong></span>
+                        <input type="range" id="range-slider" min="100" max="10000" step="100" value="1000">
+                    </div>
+                </div>
+                <div id="nearby-content">
+                    <div class="nearby-off-msg">
+                        <i class="fas fa-location-crosshairs"></i>
+                        <p>Enable location to see who's nearby</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="rs-footer">
                 <p>© 2025 BuzzIT · Made with ❤️<br>Connect · Share · Buzz</p>
             </div>

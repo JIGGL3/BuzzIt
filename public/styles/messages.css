@@ -9,8 +9,8 @@
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    /* stretch to right edge of main-content */
     min-width: 0;
+    position: relative;
 }
 
 /* Override main-content grid for messages page */
@@ -477,4 +477,11 @@
 /* ── Messages page — override main-content grid ──────── */
 .messages-page {
     grid-template-columns: 260px 1fr !important;
+}
+
+/* ── Prevent main-content from affecting messages height ─ */
+.messages-page {
+    grid-template-columns: 260px 1fr !important;
+    padding-bottom: 22px !important;
+    align-items: start;
 }

@@ -4,76 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuzzIT - User Profile</title>
-    <link rel="stylesheet" href="/styles/theme.css">
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="/styles/user-profile.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-left">
-            <a href="/index.html" class="nav-logo"><h1>BuzzIT</h1></a>
+            <a href="/index.html" class="nav-logo">
+                <span class="logo-buzz">Buzz</span><span class="logo-it">IT</span>
+            </a>
         </div>
         <div class="nav-center">
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="search-input" class="search-input" placeholder="Search users by username...">
+                <input type="text" id="search-input" class="search-input" placeholder="Search users...">
                 <div class="search-results" id="search-results"></div>
             </div>
         </div>
         <div class="nav-right">
-            <button class="dark-mode-toggle" id="dark-mode-toggle" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
+            <button class="dark-mode-toggle" id="dark-mode-toggle" title="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
             <div class="profile-menu">
                 <div class="profile-pic" id="profile-initial">?</div>
                 <div class="dropdown-menu">
-                    <a href="/profile.html"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
-                    <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="/profile.html"><i class="fas fa-user"></i> My Profile</a>
+                    <a href="/settings.html"><i class="fas fa-cog"></i> Settings</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="up-container">
-        <div class="up-card" id="profile-card">
-            <div class="up-avatar-wrap">
-                <div class="up-avatar" id="up-avatar"></div>
+    <main class="main-content">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <a href="/profile.html" class="sidebar-user">
+                <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+                <div class="sidebar-user-info">
+                    <h4 id="sidebar-name">Loading...</h4>
+                    <span id="sidebar-username">@</span>
+                </div>
+            </a>
+            <div class="sidebar-divider"></div>
+            <div class="menu-item" onclick="window.location.href='/index.html'">
+                <i class="fas fa-home"></i><span>Home</span>
             </div>
-            <div class="up-info">
-                <h2 id="up-name">Loading...</h2>
-                <p class="up-username" id="up-username">@</p>
-                <p class="up-bio" id="up-bio"></p>
-                <div class="up-stats">
-                    <div class="up-stat">
-                        <span class="up-stat-num" id="up-posts-count">0</span>
-                        <span class="up-stat-label">Posts</span>
-                    </div>
-                    <div class="up-stat">
-                        <span class="up-stat-num" id="up-followers-count">0</span>
-                        <span class="up-stat-label">Followers</span>
-                    </div>
-                    <div class="up-stat">
-                        <span class="up-stat-num" id="up-following-count">0</span>
-                        <span class="up-stat-label">Following</span>
-                    </div>
-                </div>
-                <div class="up-action-btns">
-                    <button class="follow-btn-big" id="follow-btn" style="display:none">Follow</button>
-                    <button class="msg-btn-big" id="msg-btn" style="display:none">
-                        <i class="fas fa-envelope"></i> Message
-                    </button>
-                </div>
+            <div class="menu-item" onclick="window.location.href='/profile.html'">
+                <i class="fas fa-user"></i><span>Profile</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-bell"></i><span>Notifications</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/messages.html'">
+                <i class="fas fa-envelope"></i><span>Messages</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/saved.html'">
+                <i class="fas fa-bookmark"></i><span>Saved</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='/settings.html'">
+                <i class="fas fa-cog"></i><span>Settings</span>
+            </div>
+            <div class="sidebar-divider"></div>
+            <div class="menu-item danger-item" id="sidebar-logout">
+                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
             </div>
         </div>
 
-        <div class="up-posts-section">
-            <h3>Posts</h3>
-            <div class="posts-container" id="up-posts"></div>
+        <!-- Main Profile Content -->
+        <div class="up-feed">
+            <div class="up-card" id="profile-card">
+                <div class="up-avatar-wrap">
+                    <div class="up-avatar" id="up-avatar"></div>
+                </div>
+                <div class="up-info">
+                    <h2 id="up-name">Loading...</h2>
+                    <p class="up-username" id="up-username">@</p>
+                    <p class="up-bio" id="up-bio"></p>
+                    <div class="up-stats">
+                        <div class="up-stat">
+                            <span class="up-stat-num" id="up-posts-count">0</span>
+                            <span class="up-stat-label">Posts</span>
+                        </div>
+                        <div class="up-stat">
+                            <span class="up-stat-num" id="up-followers-count">0</span>
+                            <span class="up-stat-label">Followers</span>
+                        </div>
+                        <div class="up-stat">
+                            <span class="up-stat-num" id="up-following-count">0</span>
+                            <span class="up-stat-label">Following</span>
+                        </div>
+                    </div>
+                    <div class="up-action-btns">
+                        <button class="follow-btn-big" id="follow-btn" style="display:none">Follow</button>
+                        <button class="msg-btn-big" id="msg-btn" style="display:none">
+                            <i class="fas fa-envelope"></i> Message
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="up-posts-section">
+                <h3>Posts</h3>
+                <div class="posts-container" id="up-posts"></div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="suggested-users">
+                <div class="rs-header"><h3>People to Follow</h3></div>
+                <div id="suggestions-list">
+                    <div class="loading-suggestions"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+                </div>
+            </div>
         </div>
     </main>
 
     <script src="/js/user-profile.js"></script>
-    <script src="/js/theme.js"></script>
 </body>
 </html>
